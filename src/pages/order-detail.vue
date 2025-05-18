@@ -77,7 +77,14 @@
           <view v-for="(item, idx) in refundGoods" :key="item.id" class="refund-goods-row">
             <view class="refund-goods-name">{{ item.name }}</view>
             <view class="refund-goods-ctrl">
-              <u-button size="mini" plain shape="circle" class="refund-qty-btn" @click="subRefundQty(idx)">-</u-button>
+              <u-button
+                size="mini"
+                plain
+                shape="circle"
+                class="refund-qty-btn"
+                @click="subRefundQty(idx)"
+                :disabled="item.qty === 0"
+              > - </u-button>
               <text class="refund-goods-qty">{{ item.qty }}</text>
               <u-button size="mini" plain shape="circle" class="refund-qty-btn" @click="addRefundQty(idx)">+</u-button>
             </view>
@@ -272,7 +279,7 @@ function payOrder() {
 }
 
 function subRefundQty(idx) {
-  if (refundGoods.value[idx].qty > 1) refundGoods.value[idx].qty--
+  if (refundGoods.value[idx].qty > 0) refundGoods.value[idx].qty--
 }
 function addRefundQty(idx) {
   refundGoods.value[idx].qty++

@@ -310,6 +310,10 @@ function zhifu() {
   })
 }
 
+function goToAddress() {
+ uni.navigateTo({ url: '/pages/address-detail' })
+ }
+
 onMounted(() => {
   const token = uni.getStorageSync('USER_TOKEN')
   if (!token) {
@@ -445,7 +449,7 @@ onMounted(() => {
         <view class="checkout-header">
           <view class="checkout-header-row">
             <text class="checkout-title">收货地址</text>
-            <text class="checkout-edit">更改</text>
+            <text class="checkout-edit" @click="goToAddress()">更改</text>
           </view>
           <view class="checkout-addr">{地址信息}</view>
           <view class="checkout-user">{收货人姓名}  {收货人手机号}</view>
