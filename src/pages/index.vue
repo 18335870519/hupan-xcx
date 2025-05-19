@@ -153,6 +153,9 @@ const cat3Map = {
   ]
 }
 
+const goPay = () => {
+  uni.navigateTo({ url: "/pages/order-detail" });
+}
 // 转换数据结构为模板所需格式
 const categories = computed(() => {
   return categoryOptions.map(cat => {
@@ -274,7 +277,14 @@ const cartGoods = computed(() =>
 // 结算弹窗显示状态
 const checkoutPopupShow = ref(false)
 const toggleCheckoutPopup = () => {
-  checkoutPopupShow.value = !checkoutPopupShow.value
+  const token = uni.getStorageSync('USER_TOKEN')
+  if (!token) {
+    uni.setStorageSync('LOGIN_REDIRECT', '/pages/index')
+    uni.reLaunch({ url: '/pages/login' })
+  }
+  setTimeout(() => {
+    checkoutPopupShow.value = !checkoutPopupShow.value
+  }, 2000)
 }
 
 const payFailPopupShow = ref(false)
@@ -310,16 +320,33 @@ function zhifu() {
   })
 }
 
+// 地址弹窗相关 state
+const addressPopupShow = ref(false)
+const addressList = ref([
+  { id: 1, address: '广场小区31-2-201', name: '张三', phone: '19800009999' },
+  { id: 2, address: '广场小区31-2-201', name: '李四', phone: '19800008888' },
+  { id: 3, address: '广场小区31-2-201', name: '王五', phone: '19800007777' }
+])
+const selectedAddress = ref(addressList.value[0])
+
+function onAddAddress() {
+  uni.navigateTo({ url: "/pages/address-detail" });
+}
+
+function onEditAddress(item) {
+  uni.navigateTo({ url: "/pages/address-detail?id=" + item.id });
+}
+function onSelectAddress(item) {
+  selectedAddress.value = item
+  addressPopupShow.value = false
+}
+
+// 修改 goToAddress 为弹出弹窗
 function goToAddress() {
- uni.navigateTo({ url: '/pages/address-detail' })
- }
+  addressPopupShow.value = true
+}
 
 onMounted(() => {
-  const token = uni.getStorageSync('USER_TOKEN')
-  if (!token) {
-    uni.setStorageSync('LOGIN_REDIRECT', '/pages/index')
-    uni.reLaunch({ url: '/pages/login' })
-  }
   // 让第一个商品库存不足
   const first = allGoods.value[0].list[0]
   first.cart = 3
@@ -451,8 +478,8 @@ onMounted(() => {
             <text class="checkout-title">收货地址</text>
             <text class="checkout-edit" @click="goToAddress()">更改</text>
           </view>
-          <view class="checkout-addr">{地址信息}</view>
-          <view class="checkout-user">{收货人姓名}  {收货人手机号}</view>
+          <view class="checkout-addr">{{ selectedAddress?.address || '{地址信息}' }}</view>
+          <view class="checkout-user">{{ selectedAddress?.name || '{收货人姓名}' }}  {{ selectedAddress?.phone || '{收货人手机号}' }}</view>
         </view>
         <view class="checkout-delivery">
           立即配送：预计配送时长32分钟
@@ -517,6 +544,63 @@ onMounted(() => {
               </view>
             </view>
           </scroll-view>
+        </view>
+             <view class="checkout-header">
+          <view class="checkout-header-row">
+            <text class="checkout-title">剩余商品如下：</text>
+          </view>
+        </view>
+        <view class="checkout-goods-scroll">
+          <scroll-view class="checkout-goods-scroll" scroll-y="true">
+            <view class="checkout-goods">
+              <view v-for="item in payFailList" :key="item.id" class="checkout-goods-item">
+                <view class="checkout-goods-img"></view>
+                <view class="checkout-goods-info">
+                  <view class="checkout-goods-name">{{item.name}}</view>
+                  <view class="checkout-goods-count">缺少{{item.cart - item.stock}}</view>
+                </view>
+                <view class="checkout-goods-price">￥{{(item.price * (item.cart - item.stock)).toFixed(2)}}</view>
+              </view>
+            </view>
+          </scroll-view>
+            <view class="cart-bar">
+        <view class="total-num">剩余商品：￥{{cartTotal}}</view>
+          <view class="cart-btn cart-green"
+            :class="{ 'cart-btn-disabled': Number(cartTotal) === 0 }"
+            @click="goPay"
+          >立即支付</view>
+        </view>
+        </view>
+      </view>
+    </u-popup>
+
+    <!-- 地址管理弹窗 -->
+    <u-popup
+      :show="addressPopupShow"
+      mode="bottom"
+      round="18"
+      :customStyle="'background: #f5f5f5;'"
+      :height="1000"
+      @close="addressPopupShow = false"
+    >
+      <view class="address-popup-ui">
+        <view class="address-popup-header-ui">
+          <view class="address-popup-title-ui">收货地址管理</view>
+          <view class="address-popup-add-ui" @click="onAddAddress">新增地址</view>
+        </view>
+        <view class="address-popup-list">
+          <view class="address-card" v-for="item in addressList" :key="item.id">
+            <view class="address-card-info">
+              <view class="address-card-address">{{ item.address }}</view>
+              <view class="address-card-user">
+                <text>{{ item.name }}</text>
+                <text class="address-card-phone">{{ item.phone }}</text>
+              </view>
+            </view>
+            <view class="address-card-edit" @click="onEditAddress(item)"
+              >修改</view
+            >
+          </view>
         </view>
       </view>
     </u-popup>
@@ -941,7 +1025,7 @@ onMounted(() => {
   flex-shrink: 0;
 }
 .checkout-goods-scroll {
-  height: 600rpx;
+  height: 300rpx;
   margin-bottom: 8rpx;
 }
 .checkout-goods {
@@ -1055,5 +1139,92 @@ onMounted(() => {
   height: 92rpx;
   width: 100%;
   padding-bottom: 196rpx;
+}
+
+.address-popup-ui {
+  background: #fff;
+  border-radius: 18rpx;
+  padding: 0 0 24rpx 0;
+  min-width: 320rpx;
+  min-height: 500rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+}
+.address-popup-header-ui {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 24rpx 24rpx 0 24rpx;
+}
+.address-popup-title-ui {
+  font-size: 30rpx;
+  font-weight: bold;
+  color: #222;
+}
+.address-popup-add-ui {
+  font-size: 26rpx;
+  color: #4fc08d;
+  font-weight: 600;
+  cursor: pointer;
+}
+.address-popup-list {
+  margin-top: 18rpx;
+  padding: 0 18rpx;
+  display: flex;
+  flex-direction: column;
+  gap: 18rpx;
+  overflow-y: auto;
+  height: 900rpx;
+}
+.address-card {
+  background: #fff;
+  border-radius: 12rpx;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18rpx 0 18rpx 18rpx;
+  box-shadow: 0 2rpx 8rpx #e0e0e0;
+}
+.address-card-info {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+.address-card-address {
+  font-size: 26rpx;
+  color: #222;
+  margin-bottom: 8rpx;
+}
+.address-card-user {
+  display: flex;
+  flex-direction: row;
+  gap: 24rpx;
+  font-size: 24rpx;
+  color: #444;
+}
+.address-card-phone {
+  margin-left: 8rpx;
+}
+.address-card-edit {
+  margin-right: 16rpx;
+  background: #7be495;
+  color: #fff;
+  font-size: 26rpx;
+  font-weight: 600;
+  padding: 0 16rpx;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+.total-num {
+  font-size: 28rpx;
+  color: #000;
+  font-weight: bold;
+  text-align: left;
+  padding-left: 24rpx;
 }
 </style>

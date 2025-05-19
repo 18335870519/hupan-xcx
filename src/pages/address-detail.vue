@@ -1,56 +1,61 @@
 <template>
   <view class="address-detail-page">
-    <view class="address-detail-header">
-      <text>地址变更</text>
-      <!-- 可加返回按钮/更多按钮 -->
-    </view>
     <view class="address-detail-section">
-      <view class="address-detail-label">选择家庭地址</view>
-      <view class="address-detail-select-row">
-        <view class="address-detail-select-input-wrap" @click="showAreaPicker = true">
-          <u-input
-            v-model="area"
-            placeholder="请选择小区"
-            suffixIcon="arrow-down"
-            class="address-detail-select-input"
-            readonly
-            disabled
-            :border="false"
-          />
-        </view>
+      <view class="address-detail-label"></view>
+      <view class="address-detail-radio-row">
+        <text class="address-detail-radio-label">填写地址方式：</text>
+        <u-radio-group v-model="addressMode" class="address-detail-radio-group">
+          <u-radio label="选择家庭地址" name="select"></u-radio>
+          <u-radio label="搜索其他地址" name="input"></u-radio>
+        </u-radio-group>
       </view>
-      <view class="address-detail-select-row">
-        <view class="address-detail-select-input-wrap" @click="showBuildingPicker = true">
-          <u-input
-            v-model="building"
-            placeholder="几栋"
-            suffixIcon="arrow-down"
-            class="address-detail-select-input"
-            disabled
-            :border="false"
-          />
+       <view  @click="addressMode = 'select'" class="address-detail-greenbox" :class="{ green: addressMode === 'select' }">
+          <view class="address-detail-select-row">
+          <view class="address-detail-select-input-wrap" @click="showAreaPicker = true">
+            <u-input
+              v-model="area"
+              placeholder="请选择小区"
+              suffixIcon="arrow-down"
+              class="address-detail-select-input"
+              readonly
+              disabled
+              :border="false"
+            />
+          </view>
         </view>
-        <view class="address-detail-select-input-wrap" @click="showUnitPicker = true">
-          <u-input
-            v-model="unit"
-            placeholder="几单元"
-            suffixIcon="arrow-down"
-            class="address-detail-select-input"
-            disabled
-            :border="false"
-          />
+        <view class="address-detail-select-row">
+          <view class="address-detail-select-input-wrap" @click="showBuildingPicker = true">
+            <u-input
+              v-model="building"
+              placeholder="几栋"
+              suffixIcon="arrow-down"
+              class="address-detail-select-input"
+              disabled
+              :border="false"
+            />
+          </view>
+          <view class="address-detail-select-input-wrap" @click="showUnitPicker = true">
+            <u-input
+              v-model="unit"
+              placeholder="几单元"
+              suffixIcon="arrow-down"
+              class="address-detail-select-input"
+              disabled
+              :border="false"
+            />
+          </view>
+          <view class="address-detail-select-input-wrap" @click="showRoomPicker = true">
+            <u-input
+              v-model="room"
+              placeholder="门牌号"
+              suffixIcon="arrow-down"
+              class="address-detail-select-input"
+              disabled
+              :border="false"
+            />
+          </view>
         </view>
-        <view class="address-detail-select-input-wrap" @click="showRoomPicker = true">
-          <u-input
-            v-model="room"
-            placeholder="门牌号"
-            suffixIcon="arrow-down"
-            class="address-detail-select-input"
-            disabled
-            :border="false"
-          />
-        </view>
-      </view>
+       </view>
       <!-- 小区选择器 -->
       <u-picker
         :show="showAreaPicker"
@@ -80,13 +85,14 @@
         @cancel="showRoomPicker = false"
       />
     </view>
-    <view class="address-detail-greenbox">
-      <view class="address-detail-label address-detail-greenbox-label">搜索其他地址(仅支持官方生活区服务)</view>
+    <view @click="addressMode = 'input'" class="address-detail-greenbox" :class="{ green: addressMode === 'input' }">
+      <view class="address-detail-label address-detail-greenbox-label">搜索其他地址(仅支持官港生活区服务)</view>
       <u-input
         v-model="searchAddress"
         placeholder="请输入地址"
         class="address-detail-greenbox-input"
         @input="onSearchInput"
+        :custom-style="{ border: '1px solid #333', background: '#fff' }"
       />
       <view v-if="searchList.length" class="address-search-list">
         <view
@@ -102,13 +108,16 @@
         <view class="address-detail-location-text address-detail-greenbox-location-text">
           地址：{{ locationAddress }}
         </view>
+        <view class="address-detail-location-btn-wrap">
+          <u-button type="primary" :plain="true" width="318rpx" class="address-detail-location-btn" @click="getLocation">选择当前定位</u-button>
+        </view>
       </view>
-      <u-button class="address-detail-location-btn" @click="getLocation">当前定位</u-button>
       <u-textarea v-model="detail" placeholder="详细地址补充" class="address-detail-greenbox-textarea" />
     </view>
     <view class="address-detail-info">
-      <view>收货人姓名：{{ name }}</view>
-      <view>收货人电话：{{ phone }}</view>
+      <view class="address-detail-info-label">填写收货人信息</view>
+      <u-input clearable :custom-style="{ border: '1px solid #333', background: '#fff' }" v-model="name" placeholder="收货人姓名" class="address-detail-info-input" />
+      <u-input clearable :custom-style="{ border: '1px solid #333', background: '#fff', marginTop: '12rpx' }" v-model="phone" placeholder="收货人电话" class="address-detail-info-input" />
     </view>
     <view class="address-detail-footer-fixed">
       <u-button class="address-detail-del" type="error" plain @click="deleteAddress">删除地址</u-button>
@@ -131,6 +140,7 @@ const locationAddress = ref('广场东路便利利店门口迎宾街32号路迎�
 const detail = ref('')
 const name = ref('张三')
 const phone = ref('17788678879')
+const addressMode = ref('select')
 
 // 四级联动假数据
 const areaOptions = [
@@ -274,13 +284,27 @@ function saveAddress() {
   padding: 32rpx 0 18rpx 0;
   background: #f5f5f5;
 }
-.address-detail-section {
-  padding: 0 24rpx 18rpx 24rpx;
-}
 .address-detail-label {
   font-size: 24rpx;
   color: #888;
   margin-bottom: 8rpx;
+}
+.address-detail-radio-row {
+  padding-top: 12rpx;
+  display: flex;
+  align-items: center;
+  gap: 18rpx;
+  margin-bottom: 18rpx;
+}
+.address-detail-radio-label {
+  padding-left: 24rpx;
+  font-size: 24rpx;
+  color: #222;
+  font-weight: 500;
+}
+.address-detail-radio-group {
+  display: flex;
+  gap: 32rpx;
 }
 .address-detail-select-row {
   display: flex;
@@ -302,13 +326,16 @@ function saveAddress() {
   opacity: 1 !important;
 }
 .address-detail-greenbox {
-  background: #e6fbe6;
   border-radius: 18rpx;
-  margin: 0 24rpx 18rpx 24rpx;
+  margin: 0 24rpx 0rpx 24rpx;
   padding: 24rpx 24rpx 24rpx 24rpx;
   display: flex;
   flex-direction: column;
   gap: 18rpx;
+ 
+}
+.green {
+  background: #5ac725;
   box-shadow: 0 4rpx 16rpx #b6f5b6aa;
 }
 .address-detail-greenbox-label {
@@ -322,7 +349,7 @@ function saveAddress() {
   border-radius: 10rpx !important;
   font-size: 28rpx !important;
   color: #222 !important;
-  border: 1rpx solid #b6f5b6 !important;
+  border: 1rpx solid #ccc !important;
   padding: 0 18rpx !important;
 }
 .address-detail-greenbox-location-text {
@@ -332,16 +359,14 @@ function saveAddress() {
   margin-bottom: 0;
 }
 .address-detail-location-btn {
-  width: 100%;
+  width: 154rpx;
   margin: 0 0 0 0;
   border-radius: 12rpx !important;
-  background: linear-gradient(90deg, #4fc08d 0%, #7be495 100%) !important;
   color: #fff !important;
   font-size: 30rpx !important;
   font-weight: bold !important;
   height: 64rpx !important;
   line-height: 64rpx !important;
-  box-shadow: 0 2rpx 8rpx #b6f5b6aa;
   border: none !important;
   letter-spacing: 2rpx;
 }
@@ -360,7 +385,8 @@ function saveAddress() {
   gap: 12rpx;
 }
 .address-detail-info {
-  margin: 18rpx 24rpx 0 24rpx;
+  margin: 0rpx 24rpx 0 24rpx;
+  padding: 0 24rpx;
   font-size: 24rpx;
   color: #222;
   line-height: 2;
@@ -413,5 +439,28 @@ function saveAddress() {
 }
 .address-search-item:last-child {
   border-bottom: none;
+}
+.address-detail-location-btn-wrap {
+  width: 318rpx;
+}
+:deep(.u-button--plain.u-button--primary) {
+  border: 2rpx solid #5ac725 !important;
+  color: #5ac725 !important;
+  background: #fff !important;
+}
+.address-detail-info-input {
+  margin-bottom: 12rpx;
+  background: #fff !important;
+  border-radius: 10rpx !important;
+  font-size: 26rpx !important;
+  color: #222 !important;
+  border: 1rpx solid #ccc !important;
+  padding: 0 18rpx !important;
+}
+.address-detail-info-label {
+  font-size: 28rpx;
+  color: #222;
+  font-weight: 800;
+  margin-bottom: 8rpx;
 }
 </style>

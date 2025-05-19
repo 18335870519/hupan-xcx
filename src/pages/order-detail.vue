@@ -347,7 +347,6 @@ onMounted(() => {
 .order-detail-page {
   min-height: 100vh;
   background: #f7f7f7;
-  padding-bottom: 120rpx;
 }
 .order-status-bar {
   display: flex;

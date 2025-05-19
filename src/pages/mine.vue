@@ -3,19 +3,31 @@
     <!-- 顶部手机号 -->
     <view class="mine-header">187****9900</view>
     <view class="tool-box">
-        <!-- 通过接口权限判断 -->
-        <view v-if="true" class="my-order" @click="showPicker = true">
-            主体列表
-        </view>
-        <button class="customer-service-btn" open-type="contact" show-message-card="true" send-message-title="您好，请问有什么可以帮您？" send-message-path="/pages/mine" send-message-img="">
-            客服
-        </button>
-        <view class="address" @click="addressPopupShow = true">
-            地址
-        </view>
+      <!-- 通过接口权限判断 -->
+       <view v-if="true" class="my-xy" @click="goUserAgreement">
+        用户协议
+      </view>
+    
+      <button
+        class="customer-service-btn"
+        open-type="contact"
+        show-message-card="true"
+        send-message-title="您好，请问有什么可以帮您？"
+        send-message-path="/pages/mine"
+        send-message-img=""
+      >
+        客服
+      </button>
+      <view v-if="true" class="my-order" @click="showPicker = true">
+        主体列表
+      </view>
+      <view class="address" @click="addressPopupShow = true"> 地址 </view>
     </view>
     <!-- 卡片区域 -->
-    <view class="mine-card-title">全部订单</view>
+    <view style="margin-top: 32rpx;display: flex; flex-direction: row; justify-content: space-between; align-items: center;">
+      <view class="mine-card-title">全部订单</view>
+      <view class="mine-more" @click.stop="goOrderList">查看更多</view>
+    </view>
     <view class="mine-card">
       <view class="mine-card-left">
         <view class="mine-goods-list">
@@ -31,7 +43,6 @@
         </view>
       </view>
       <view class="mine-card-right">
-        <view class="mine-more">查看更多</view>
         <view class="mine-status">订单状态</view>
         <view class="mine-amount">35.00元</view>
         <view class="mine-count">共7件</view>
@@ -65,7 +76,9 @@
                 <text class="address-card-phone">{{ item.phone }}</text>
               </view>
             </view>
-            <view class="address-card-edit" @click="onEditAddress(item)">修改</view>
+            <view class="address-card-edit" @click="onEditAddress(item)"
+              >修改</view
+            >
           </view>
         </view>
       </view>
@@ -74,68 +87,74 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted } from "vue";
 
-const subjectList = ['主体A', '主体B', '主体C']
-const showPicker = ref(false)
-const currentSubject = ref(subjectList[0])
+const goUserAgreement = () => {
+  uni.navigateTo({ url: "/pages/user-agreement" });
+};
+const goOrderList = () => {
+  uni.navigateTo({ url: "/pages/order-list" });
+};
+const subjectList = ["主体A", "主体B", "主体C"];
+const showPicker = ref(false);
+const currentSubject = ref(subjectList[0]);
 const goodsList = ref([
-  { id: 1, name: '奶油草莓' },
-  { id: 2, name: '黑巧克力' },
-  { id: 3, name: '唐师傅方店' }
-])
-const addressPopupShow = ref(false)
+  { id: 1, name: "奶油草莓" },
+  { id: 2, name: "黑巧克力" },
+  { id: 3, name: "唐师傅方店" },
+]);
+const addressPopupShow = ref(false);
 const addressList = ref([
-  { id: 1, address: '广场小区31-2-201', name: '张三', phone: '19800009999' },
-  { id: 2, address: '广场小区31-2-201', name: '张三', phone: '19800009999' },
-  { id: 3, address: '广场小区31-2-201', name: '张三', phone: '19800009999' },
-  { id: 4, address: '广场小区31-2-201', name: '张三', phone: '19800009999' },
-  { id: 5, address: '广场小区31-2-201', name: '张三', phone: '19800009999' }
-])
+  { id: 1, address: "广场小区31-2-201", name: "张三", phone: "19800009999" },
+  { id: 2, address: "广场小区31-2-201", name: "张三", phone: "19800009999" },
+  { id: 3, address: "广场小区31-2-201", name: "张三", phone: "19800009999" },
+  { id: 4, address: "广场小区31-2-201", name: "张三", phone: "19800009999" },
+  { id: 5, address: "广场小区31-2-201", name: "张三", phone: "19800009999" },
+]);
 
 onMounted(() => {
-  const token = uni.getStorageSync('USER_TOKEN')
+  const token = uni.getStorageSync("USER_TOKEN");
   if (!token) {
-    uni.setStorageSync('LOGIN_REDIRECT', '/pages/mine')
-    uni.reLaunch({ url: '/pages/login' })
+    uni.setStorageSync("LOGIN_REDIRECT", "/pages/mine");
+    uni.reLaunch({ url: "/pages/login" });
   }
-})
+});
 
 function onPickerConfirm(e) {
-  currentSubject.value = subjectList[e.indexs[0]]
-  showPicker.value = false
-//   fetchList()
+  currentSubject.value = subjectList[e.indexs[0]];
+  showPicker.value = false;
+  //   fetchList()
 }
 
 function fetchList() {
   // 模拟接口请求，不同主体返回不同商品
-  goodsList.value = []
-  setTimeout(() => { 
-       goodsList.value = [
-        { id: 1, name: '奶油草莓' },
-        { id: 2, name: '黑巧克力' },
-        { id: 3, name: '唐师傅方店' }
-      ]
-  }, 400)
+  goodsList.value = [];
+  setTimeout(() => {
+    goodsList.value = [
+      { id: 1, name: "奶油草莓" },
+      { id: 2, name: "黑巧克力" },
+      { id: 3, name: "唐师傅方店" },
+    ];
+  }, 400);
 }
 
 function goOrderDetail(item) {
-  uni.navigateTo({ url: '/pages/order-detail?id=' + item.id })
+  uni.navigateTo({ url: "/pages/order-detail?id=" + item.id });
 }
 
 function onAddAddress() {
-  uni.navigateTo({ url: '/pages/address-detail' })
+  uni.navigateTo({ url: "/pages/address-detail" });
 }
 
 function onEditAddress(item) {
-  uni.navigateTo({ url: '/pages/address-detail?id=' + item.id })
+  uni.navigateTo({ url: "/pages/address-detail?id=" + item.id });
 }
 </script>
 
 <style scoped lang="scss">
 .mine-page {
   min-height: 100vh;
-  background: #dadada;
+  background: #fff;
 }
 .mine-header {
   font-size: 34rpx;
@@ -151,6 +170,7 @@ function onEditAddress(item) {
 }
 .mine-card {
   background: #fff;
+  border: 1rpx solid #000;
   border-radius: 16rpx;
   margin: 0 18rpx;
   display: flex;
@@ -188,6 +208,13 @@ function onEditAddress(item) {
   color: #333;
   text-align: center;
 }
+.mine-more {
+  color: #4fc08d;
+  font-size: 26rpx;
+  margin-bottom: 10rpx;
+  font-weight: 600;
+  padding-right: 24rpx;
+}
 .mine-card-right {
   flex: 1;
   display: flex;
@@ -198,12 +225,6 @@ function onEditAddress(item) {
   font-size: 26rpx;
   color: #444;
   height: 100%;
-  .mine-more {
-    color: #4fc08d;
-    font-size: 26rpx;
-    margin-bottom: 10rpx;
-    font-weight: 600;
-  }
   .mine-status {
     margin-bottom: 8rpx;
   }
@@ -226,6 +247,9 @@ function onEditAddress(item) {
   font-size: 26rpx;
   margin-bottom: 16rpx;
   font-weight: 600;
+}
+.my-xy {
+    color: #888;
 }
 .my-order {
   margin-right: 24rpx;
@@ -314,7 +338,7 @@ function onEditAddress(item) {
   margin-left: 8rpx;
 }
 .address-card-edit {
-    margin-right: 16rpx;
+  margin-right: 16rpx;
   background: #7be495;
   color: #fff;
   font-size: 26rpx;
