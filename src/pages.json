@@ -41,6 +41,12 @@
       "style": {
         "navigationBarTitleText": "地址变更"
       }
+    },
+    {
+      "path": "pages/supply-manage",
+      "style": {
+        "navigationBarTitleText": "供应管理"
+      }
     }
   ],
   "globalStyle": {

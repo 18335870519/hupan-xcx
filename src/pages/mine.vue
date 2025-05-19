@@ -123,6 +123,9 @@ onMounted(() => {
 function onPickerConfirm(e) {
   currentSubject.value = subjectList[e.indexs[0]];
   showPicker.value = false;
+  uni.navigateTo({
+    url: `/pages/supply-manage?subject=${encodeURIComponent(currentSubject.value)}`
+  });
   //   fetchList()
 }
 
