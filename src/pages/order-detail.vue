@@ -4,9 +4,10 @@
     <view class="order-status-bar">
       <view class="order-status-left">
         <text class="order-status-title">订单状态</text>
-        <text class="order-status-desc">(预计12点32分前送达，如遇繁忙和乐天气会有延迟)</text>
+        <text  v-if="isNotSupplier" class="order-status-desc">(预计12点32分前送达，如遇繁忙和乐天气会有延迟)</text>
       </view>
       <u-button
+        v-if="isNotSupplier"
         class="order-invoice-btn"
         plain
         size="mini"
@@ -53,11 +54,11 @@
 
     <!-- 底部操作栏 -->
     <view class="order-bottom-bar">
-      <u-button class="order-btn" type="info" plain @click="refundPopupShow = true">申请退款</u-button>
+      <u-button class="order-btn" type="info" plain @click="refundPopupShow = true">{{ isNotSupplier ? '申请退款' : '退供退款' }}</u-button>
       <u-button class="order-btn" type="info" plain @click="refundDetailPopupShow = true">退款详情</u-button>
-      <u-button class="order-btn" type="info" plain @click="cancelOrder">取消订单</u-button>
-      <u-button class="order-btn order-btn-main" type="primary" @click="payOrder">立即支付</u-button>
-      <u-button class="order-btn order-btn-green" type="success" plain @click="callRider">联系骑手</u-button>
+      <u-button v-if="isNotSupplier" class="order-btn" type="info" plain @click="cancelOrder">取消订单</u-button>
+      <u-button v-if="isNotSupplier" class="order-btn order-btn-main" type="primary" @click="payOrder">立即支付</u-button>
+      <u-button v-if="isNotSupplier" class="order-btn order-btn-green" type="success" plain @click="callRider">联系骑手</u-button>
     </view>
 
     <u-popup
@@ -96,12 +97,15 @@
         </view>
         <view class="refund-section">
           <view class="refund-label">退款原因</view>
-          <u-radio-group v-model="refundReason" class="refund-radio-group">
+          <u-radio-group v-if="isNotSupplier"  v-model="refundReason" class="refund-radio-group">
             <u-radio label="商品过期变质" name="商品过期变质"></u-radio>
             <u-radio label="其他" name="其他"></u-radio>
           </u-radio-group>
+             <u-radio-group v-else  v-model="refundReason" class="refund-radio-group">
+            <u-radio label="商品缺货" name="商品缺货"></u-radio>
+          </u-radio-group>
         </view>
-        <view class="refund-section">
+        <view v-if="isNotSupplier" class="refund-section">
           <u-textarea
             v-model="refundDesc"
             placeholder="退款详细描述100字内"
@@ -111,7 +115,7 @@
             class="refund-textarea"
           ></u-textarea>
         </view>
-        <view class="refund-section refund-upload-row">
+        <view v-if="isNotSupplier" class="refund-section refund-upload-row">
           <u-upload
             :fileList="refundImages"
             @afterRead="afterRead"
@@ -206,6 +210,22 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
+import { onLoad } from '@dcloudio/uni-app'
+
+// 存储URL参数
+const routeParams = ref({})
+
+// 使用onLoad钩子直接接收页面参数
+onLoad((options) => {
+  console.log(999, '页面参数:', options)
+  routeParams.value = options || {}
+})
+
+// 检查URL参数中是否有type=gys
+const isNotSupplier = computed(() => {
+  return routeParams.value.type !== 'gys'
+})
+
 
 const goodsList = ref([
   { id: 1, name: '商品A', qty: 2, amount: 18.00 },
@@ -229,7 +249,9 @@ const refundAmount = ref(10)
 const refundReason = ref('商品过期变质')
 const refundDesc = ref('')
 const refundImages = ref([])
-
+if(!isNotSupplier.value){
+  refundReason.value = '商品缺货'
+}
 const invoicePopupShow = ref(false)
 const invoiceType = ref('company')
 const personTitle = ref('')

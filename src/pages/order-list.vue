@@ -29,6 +29,9 @@ const goodsList = ref([
   { id: 2, name: "黑巧克力" },
   { id: 3, name: "唐师傅方店" },
 ]);
+function goOrderDetail(item) {
+  uni.navigateTo({ url: "/pages/order-detail?id=" + item.id });
+}
 </script>
 <style scoped>
 .mine-card {

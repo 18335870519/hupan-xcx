@@ -7,6 +7,18 @@
       }
     },
     {
+      "path": "pages/abc",
+      "style": {
+        "navigationBarTitleText": "配送站"
+      }
+    },
+    {
+      "path": "pages/stock-config",
+      "style": {
+        "navigationBarTitleText": "库存配置"
+      }
+    },
+    {
       "path": "pages/user-agreement",
       "style": {
         "navigationBarTitleText": "用户协议"

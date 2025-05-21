@@ -95,7 +95,7 @@ const goUserAgreement = () => {
 const goOrderList = () => {
   uni.navigateTo({ url: "/pages/order-list" });
 };
-const subjectList = ["主体A", "主体B", "主体C"];
+const subjectList = ["主体A", "主体B", "主体C", "配送站"];
 const showPicker = ref(false);
 const currentSubject = ref(subjectList[0]);
 const goodsList = ref([
@@ -123,9 +123,18 @@ onMounted(() => {
 function onPickerConfirm(e) {
   currentSubject.value = subjectList[e.indexs[0]];
   showPicker.value = false;
-  uni.navigateTo({
-    url: `/pages/supply-manage?subject=${encodeURIComponent(currentSubject.value)}`
-  });
+  
+  // 如果选择的是配送站，跳转到/pages/abc
+  if (currentSubject.value === '配送站') {
+    uni.navigateTo({
+      url: '/pages/abc'
+    });
+  } else {
+    // 其他选项保持原有跳转逻辑
+    uni.navigateTo({
+      url: `/pages/supply-manage?subject=${encodeURIComponent(currentSubject.value)}`
+    });
+  }
   //   fetchList()
 }
 
